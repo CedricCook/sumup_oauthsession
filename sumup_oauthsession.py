@@ -52,14 +52,9 @@ class OAuth2Session(object):
 
         return authorization_url
 
-    def authorize(self, auth_response):
-        response = self._url_to_params(auth_response)
-
-        try:
-            if response['state'] != self.state:
-                raise ValueError("WARNING: CSRF detected. Please start the process again.")
-        except KeyError:
-            raise ValueError("WARNING: CSRF detected. Please start the process again.")
+    def authorize(self, code, state):
+        if state != self.state: 
+            raise ValueError('WARNING: CSRF detected. Please start the SumUp authentification process again.')
 
         token_url = self.base_url + TOKEN_ENDPOINT
 
@@ -68,7 +63,7 @@ class OAuth2Session(object):
             'client_id': self.client_id,
             'client_secret': self.client_secret,
             'redirect_uri': self.redirect_uri,
-            'code': response['code'],
+            'code': code,
         }
         
         r = requests.post(token_url, data=params)
